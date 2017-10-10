@@ -69,6 +69,11 @@ def filter_lines(lines):
     #     - Weighted average (slope, intercept) => line    
     #     - Linear regression
 
+    # TODO - group based on positive / negative slope, linear regression of each
+    # TODO - draw line based on slope + intercept
+    # TODO - return line list with line type (LINE_SOLID, LINE_DASHED, LINE_LEFT, LINE_RIGHT, LINE_WHITE, LINE_YELLOW)
+
+
     clusters = {}
 
     for line in lines:
@@ -89,7 +94,7 @@ def filter_lines(lines):
         v_lines = [l[0] for l in v]
         num = len(v)
         sum_len = sum([l[1] for l in v])
-        print(k, len(v), sum_len)
+        #print(k, len(v), sum_len)
         if num > 1 and sum_len > 100:
             #print(k, v)
             out.extend(v_lines)
