@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
+import math
 import helper
 
 CANNY_LOW = 150
@@ -50,8 +51,49 @@ def image_roi(img, top_width, top_height):
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     return cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
 
+def len_slope_intercept(line):
+    si = []
+    for x1, y1, x2, y2 in line:
+        #si.append(abs(x2-x1) / abs(y2-y1))
+        l = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        p = np.polyfit([y1, y2], [x1, x2], 1)
+        # Only process first segment of line
+        return (l, p[0], p[1])   
+
+
 def filter_lines(lines):
-    return lines
+    # Basic Approach
+    #   Convert lines into (slope, intercept, length) form
+    #   Bin into (slope, intercept)
+    #   Search grid for boxes with sum(length) above threshold
+    #     - Weighted average (slope, intercept) => line    
+    #     - Linear regression
+
+    clusters = {}
+
+    for line in lines:
+        (l, s, i) = len_slope_intercept(line)
+        key = (round(s * 10.0), round(i / 40.0))
+        #print(line, l, s, i, key)
+        v = clusters.get(key, [])
+        v.append((line, l, s, i))
+        clusters[key] = v
+
+    keys = list(clusters.keys())
+    keys.sort()
+
+    out = []
+
+    for k in keys:
+        v = clusters[k]
+        v_lines = [l[0] for l in v]
+        num = len(v)
+        sum_len = sum([l[1] for l in v])
+        #print(k, len(v), round())
+        if sum_len > 100:
+            #print(k, v)
+            out.extend(v_lines)
+    return out
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
@@ -92,7 +134,7 @@ def main(args):
         img = mpimg.imread(arg)
         a = fig.add_subplot(rows, cols, i + 1)
         a.set_title(title, fontsize=10)
-        plt.axis('off')
+        # plt.axis('off')
         img_out = process_image(img)
         plt.imshow(img_out)        
 
