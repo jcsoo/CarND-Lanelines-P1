@@ -90,9 +90,31 @@ def display_weighted_hough_lines():
     plt.imshow(combined)
     plt.show()
     
+def display_multiple():
+    import os
+
+    # On OSX, see https://matplotlib.org/faq/osx_framework.html
+
+    images = os.listdir('test_images')
+
+    def press(event):
+        if event.key == 'escape':
+            plt.close(event.canvas.figure)
+
+    fig = plt.figure(figsize=(10,8))    
+    fig.canvas.mpl_connect('key_release_event', press)   
+    fig.tight_layout() 
+    for i in range(len(images)):            
+        img = mpimg.imread(os.path.join('test_images', images[i]))
+        a = fig.add_subplot(2, len(images) / 2, i + 1)
+        a.set_title(os.path.splitext(images[i])[0], fontsize=10)
+        plt.axis('off')
+        plt.imshow(img)        
+        
+    plt.show()
 
 def main():
-    display_weighted_hough_lines()
+    display_multiple()
 
 if __name__ == '__main__':
     main()
