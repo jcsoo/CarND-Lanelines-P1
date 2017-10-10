@@ -6,10 +6,10 @@ import cv2
 import math
 import helper
 
-CANNY_LOW = 150
+CANNY_LOW = 100
 CANNY_HIGH = 200
 
-GAUSS_KERNEL = 5
+GAUSS_KERNEL = 3
 
 # fractional width of parallelogram top
 ROI_TOP_WIDTH = 0.30
@@ -21,14 +21,14 @@ HOUGH_RHO = 1
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
-HOUGH_THRESHOLD = 1
+HOUGH_THRESHOLD = 4
 # minimum number of pixels making up a line
 HOUGH_MIN_LINE_LEN = 20
 # maximum gap in pixels between connectable line segments
 HOUGH_MAX_LINE_GAP = 10
 
 LINE_COLOR = [255, 0, 0]
-LINE_WIDTH = 2
+LINE_WIDTH = 1
 
 # multiplier for lines
 MERGE_ALPHA = 1.0
@@ -89,8 +89,8 @@ def filter_lines(lines):
         v_lines = [l[0] for l in v]
         num = len(v)
         sum_len = sum([l[1] for l in v])
-        #print(k, len(v), round())
-        if sum_len > 100:
+        print(k, len(v), sum_len)
+        if num > 1 and sum_len > 100:
             #print(k, v)
             out.extend(v_lines)
     return out
@@ -108,7 +108,8 @@ def process_image(img):
 
     img = helper.grayscale(img)
     img = helper.canny(img, CANNY_LOW, CANNY_HIGH)
-    img = helper.gaussian_blur(img, GAUSS_KERNEL)    
+    img = helper.gaussian_blur(img, GAUSS_KERNEL) 
+    
     img = helper.region_of_interest(img, vertices)    
     
     lines = hough_lines(img, HOUGH_RHO, HOUGH_THETA, HOUGH_THRESHOLD, HOUGH_MIN_LINE_LEN, HOUGH_MAX_LINE_GAP)
