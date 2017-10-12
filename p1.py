@@ -38,6 +38,18 @@ GROUP_SLOPE = 0.5
 GROUP_MIN_NUM = 1
 GROUP_MIN_SUM = 1
 
+GROUP_LEFT_OFFSET_MIN = 0.0
+GROUP_LEFT_OFFSET_MAX = 0.1
+GROUP_LEFT_SLOPE_MIN = 1.0
+GROUP_LEFT_SLOPE_MAX = 2.0
+
+GROUP_RIGHT_OFFSET_MIN = 0.9
+GROUP_RIGHT_OFFSET_MAX = 1.1
+GROUP_RIGHT_SLOPE_MIN = -2.0
+GROUP_RIGHT_SLOPE_MAX = -1.0
+
+
+
 # multiplier for lines
 MERGE_ALPHA = 1.0
 # multiplier for base image
@@ -68,7 +80,7 @@ def len_slope_intercept(line):
         return (l, p[0], p[1])   
 
 
-def filter_lines(lines):
+def filter_lines(lines, vertices):
     # Basic Approach
     #   Convert lines into (slope, intercept, length) form
     #   Bin into (slope, intercept)
@@ -80,6 +92,12 @@ def filter_lines(lines):
     # TODO - draw line based on slope + intercept
     # TODO - return line list with line type (LINE_SOLID, LINE_DASHED, LINE_LEFT, LINE_RIGHT, LINE_WHITE, LINE_YELLOW)
 
+    y_max = vertices[0][0][1]
+    y_min = vertices[0][1][1]
+
+    x_min = vertices[0][0][0]
+    x_max = vertices[0][3][0]
+    x_mid = int((x_max + x_min) / 2)
 
     clusters = {}
 
@@ -109,8 +127,8 @@ def filter_lines(lines):
             s_sum = 0.0
             i_sum = 0.0
             l_sum = 0.0
-            y_min = 0.0
-            y_max = 0.0
+            # y_min = 0.0
+            # y_max = 0.0
             for item in v:
                 (line, l, s, i) = item
                 #print("  %s %4.2f %f %f" % (line, l, s, i))
@@ -125,19 +143,37 @@ def filter_lines(lines):
 
                 #print("      dx = %f dy = %f m = %f" % (dx, dy, m))
 
-                if y1 < y_min or y_min == 0.0:
-                    y_min = y1
-                if y2 < y_min:
-                    y_min = y2
-                if y1 > y_max:
-                    y_max = y1
-                if y2 > y_max:
-                    y_max = y2
+                # if y1 < y_min or y_min == 0.0:
+                #     y_min = y1
+                # if y2 < y_min:
+                #     y_min = y2
+                # if y1 > y_max:
+                #     y_max = y1
+                # if y2 > y_max:
+                #     y_max = y2
 
             s_avg = s_sum / l_sum
             i_avg = i_sum / l_sum
             #print("  %f %f (%f %f)" % (s_avg, i_avg, y_min, y_max))
             
+            # filter for sane s_avg
+
+            if i_avg > x_mid:
+                if i_avg < x_max * GROUP_RIGHT_OFFSET_MIN or i_avg > x_max * GROUP_RIGHT_OFFSET_MAX:
+                    print('    right reject offset', s_avg, i_avg)
+                    continue
+                if s_avg < GROUP_RIGHT_SLOPE_MIN or s_avg > GROUP_RIGHT_SLOPE_MAX:
+                    print('    right reject slope', s_avg, i_avg)
+                    continue
+            else:
+                if i_avg < x_max * GROUP_LEFT_OFFSET_MIN or i_avg > x_max * GROUP_LEFT_OFFSET_MAX:
+                    print('    left reject offset', s_avg, i_avg)
+                    continue
+                if s_avg < GROUP_LEFT_SLOPE_MIN or s_avg > GROUP_LEFT_SLOPE_MAX:
+                    print('    left reject slope', s_avg, i_avg)
+                    continue
+
+
             # y = mx + b
 
             line = v[0][0][0]            
@@ -147,9 +183,9 @@ def filter_lines(lines):
             # y1 = int(line[3])
             # x1 = int((y1 * s_avg) + i_avg)
 
-            y0 = int(350)
+            y0 = int(y_min)
             x0 = int((y0 * s_avg) + i_avg)
-            y1 = int(540)
+            y1 = int(y_max)
             x1 = int((y1 * s_avg) + i_avg)
 
             line = [[x0, y0, x1, y1]]
@@ -168,7 +204,7 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
 def process_image(img):    
     img_orig = img.copy()
     vertices = image_roi(img, ROI_TOP_WIDTH, ROI_TOP_HEIGHT)
-    
+    #print(vertices)
     img = helper.grayscale(img)
     img = helper.canny(img, CANNY_LOW, CANNY_HIGH)
     img = helper.gaussian_blur(img, GAUSS_KERNEL)     
@@ -176,7 +212,7 @@ def process_image(img):
     img = helper.region_of_interest(img, vertices)    
     #return img
     lines = hough_lines(img, HOUGH_RHO, HOUGH_THETA, HOUGH_THRESHOLD, HOUGH_MIN_LINE_LEN, HOUGH_MAX_LINE_GAP)    
-    lines = filter_lines(lines)
+    lines = filter_lines(lines, vertices)
 
     img_lines = draw_lines(img_orig, lines, LINE_COLOR, LINE_WIDTH)
     
