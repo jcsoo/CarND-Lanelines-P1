@@ -24,7 +24,7 @@ HOUGH_RHO = 2
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
-HOUGH_THRESHOLD = 200
+HOUGH_THRESHOLD = 50
 # minimum number of pixels making up a line
 HOUGH_MIN_LINE_LEN = 40
 # maximum gap in pixels between connectable line segments
@@ -32,6 +32,9 @@ HOUGH_MAX_LINE_GAP = 5
 
 LINE_COLOR = [255, 0, 0]
 LINE_WIDTH = 1
+
+GROUP_OFFSET = 5.0
+GROUP_SLOPE = 20.0
 
 # multiplier for lines
 MERGE_ALPHA = 1.0
@@ -83,7 +86,7 @@ def filter_lines(lines):
 
     for line in lines:
         (l, s, i) = len_slope_intercept(line)
-        key = (round(s * 5.0) / 5.0, round(i / 5.0) * 5.0)
+        key = (round(s * GROUP_SLOPE) / GROUP_SLOPE, round(i / GROUP_OFFSET) * GROUP_OFFSET)
         #print(line, l, s, i, key)
         v = clusters.get(key, [])
         v.append((line, l, s, i))
@@ -100,7 +103,7 @@ def filter_lines(lines):
         num = len(v)
         sum_len = sum([l[1] for l in v])
         #print(k, len(v), sum_len)
-        if num > 1 and sum_len > 120:
+        if num > 1 and sum_len > 20:
             print(k)
             s_sum = 0.0
             i_sum = 0.0
