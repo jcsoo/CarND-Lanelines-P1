@@ -9,7 +9,7 @@ import cv2
 import math
 import helper
 
-CANNY_LOW = 100
+CANNY_LOW = 50
 CANNY_HIGH = 250
 
 GAUSS_KERNEL = 3
@@ -17,7 +17,7 @@ GAUSS_KERNEL = 3
 # fractional width of parallelogram top
 ROI_TOP_WIDTH = 0.30
 # fractional height of parallelogram
-ROI_TOP_HEIGHT = 0.35
+ROI_TOP_HEIGHT = 0.38
 
 # distance resolution in pixels of the Hough grid
 HOUGH_RHO = 1
@@ -33,7 +33,7 @@ HOUGH_MAX_LINE_GAP = 5
 LINE_COLOR = [0, 255, 0]
 LINE_WIDTH = 4
 
-GROUP_OFFSET = 500.0
+GROUP_OFFSET = 1000.0
 GROUP_SLOPE = 0.5
 GROUP_MIN_NUM = 1
 GROUP_MIN_SUM = 1
