@@ -24,26 +24,30 @@ HOUGH_RHO = 1
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
-HOUGH_THRESHOLD = 40
+HOUGH_THRESHOLD = 20
 # minimum number of pixels making up a line
-HOUGH_MIN_LINE_LEN = 20
+HOUGH_MIN_LINE_LEN = 10
 # maximum gap in pixels between connectable line segments
 HOUGH_MAX_LINE_GAP = 5
 
 LINE_COLOR = [0, 255, 0]
 LINE_WIDTH = 4
 
+GROUP_ENABLE = True
+
 GROUP_OFFSET = 1000.0
 GROUP_SLOPE = 0.5
 GROUP_MIN_NUM = 1
 GROUP_MIN_SUM = 1
 
-GROUP_LEFT_OFFSET_MIN = -0.1
+GROUP_ENABLE_ENVELOPE = True
+
+GROUP_LEFT_OFFSET_MIN = -0.2
 GROUP_LEFT_OFFSET_MAX = 0.1
 GROUP_LEFT_SLOPE_MIN = 1.0
 GROUP_LEFT_SLOPE_MAX = 2.0
 
-GROUP_RIGHT_OFFSET_MIN = 0.9
+GROUP_RIGHT_OFFSET_MIN = 0.8
 GROUP_RIGHT_OFFSET_MAX = 1.1
 GROUP_RIGHT_SLOPE_MIN = -2.0
 GROUP_RIGHT_SLOPE_MAX = -1.0
@@ -158,21 +162,22 @@ def filter_lines(lines, vertices):
             
             # filter for sane s_avg
 
-            if i_avg > x_mid:
-                if i_avg < x_max * GROUP_RIGHT_OFFSET_MIN or i_avg > x_max * GROUP_RIGHT_OFFSET_MAX:
-                    print('    right reject offset', s_avg, i_avg)
-                    continue
-                if s_avg < GROUP_RIGHT_SLOPE_MIN or s_avg > GROUP_RIGHT_SLOPE_MAX:
-                    print('    right reject slope', s_avg, i_avg)
-                    continue
-            else:
-                # print('  left')
-                if i_avg < x_max * GROUP_LEFT_OFFSET_MIN or i_avg > x_max * GROUP_LEFT_OFFSET_MAX:
-                    print('    left reject offset', s_avg, i_avg)
-                    continue
-                if s_avg < GROUP_LEFT_SLOPE_MIN or s_avg > GROUP_LEFT_SLOPE_MAX:
-                    print('    left reject slope', s_avg, i_avg)
-                    continue
+            if GROUP_ENABLE_ENVELOPE:
+                if i_avg > x_mid:
+                    if i_avg < x_max * GROUP_RIGHT_OFFSET_MIN or i_avg > x_max * GROUP_RIGHT_OFFSET_MAX:
+                        print('    right reject offset', s_avg, i_avg, sum_len)
+                        continue
+                    if s_avg < GROUP_RIGHT_SLOPE_MIN or s_avg > GROUP_RIGHT_SLOPE_MAX:
+                        print('    right reject slope', s_avg, i_avg, sum_len)
+                        continue
+                else:
+                    # print('  left')
+                    if i_avg < x_max * GROUP_LEFT_OFFSET_MIN or i_avg > x_max * GROUP_LEFT_OFFSET_MAX:
+                        print('    left reject offset', s_avg, i_avg, sum_len)
+                        continue
+                    if s_avg < GROUP_LEFT_SLOPE_MIN or s_avg > GROUP_LEFT_SLOPE_MAX:
+                        print('    left reject slope', s_avg, i_avg, sum_len)
+                        continue
 
 
             # y = mx + b
@@ -213,7 +218,8 @@ def process_image(img):
     img = helper.region_of_interest(img, vertices)    
     #return img
     lines = hough_lines(img, HOUGH_RHO, HOUGH_THETA, HOUGH_THRESHOLD, HOUGH_MIN_LINE_LEN, HOUGH_MAX_LINE_GAP)    
-    lines = filter_lines(lines, vertices)
+    if GROUP_ENABLE:
+        lines = filter_lines(lines, vertices)
 
     img_lines = draw_lines(img_orig, lines, LINE_COLOR, LINE_WIDTH)
     
