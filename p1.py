@@ -17,14 +17,14 @@ GAUSS_KERNEL = 3
 # fractional width of parallelogram top
 ROI_TOP_WIDTH = 0.30
 # fractional height of parallelogram
-ROI_TOP_HEIGHT = 0.38
+ROI_TOP_HEIGHT = 0.35
 
 # distance resolution in pixels of the Hough grid
 HOUGH_RHO = 1
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
-HOUGH_THRESHOLD = 50
+HOUGH_THRESHOLD = 40
 # minimum number of pixels making up a line
 HOUGH_MIN_LINE_LEN = 20
 # maximum gap in pixels between connectable line segments
@@ -208,7 +208,7 @@ def process_image(img):
     #print(vertices)
     img = helper.grayscale(img)
     img = helper.canny(img, CANNY_LOW, CANNY_HIGH)
-    img = helper.gaussian_blur(img, GAUSS_KERNEL)     
+    # img = helper.gaussian_blur(img, GAUSS_KERNEL)     
     
     img = helper.region_of_interest(img, vertices)    
     #return img
