@@ -10,7 +10,7 @@ import math
 import helper
 
 CANNY_LOW = 100
-CANNY_HIGH = 200
+CANNY_HIGH = 250
 
 GAUSS_KERNEL = 3
 
@@ -20,21 +20,23 @@ ROI_TOP_WIDTH = 0.30
 ROI_TOP_HEIGHT = 0.35
 
 # distance resolution in pixels of the Hough grid
-HOUGH_RHO = 2
+HOUGH_RHO = 1
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
 HOUGH_THRESHOLD = 50
 # minimum number of pixels making up a line
-HOUGH_MIN_LINE_LEN = 40
+HOUGH_MIN_LINE_LEN = 20
 # maximum gap in pixels between connectable line segments
 HOUGH_MAX_LINE_GAP = 5
 
-LINE_COLOR = [255, 0, 0]
-LINE_WIDTH = 1
+LINE_COLOR = [0, 255, 0]
+LINE_WIDTH = 4
 
-GROUP_OFFSET = 5.0
-GROUP_SLOPE = 20.0
+GROUP_OFFSET = 500.0
+GROUP_SLOPE = 0.5
+GROUP_MIN_NUM = 1
+GROUP_MIN_SUM = 1
 
 # multiplier for lines
 MERGE_ALPHA = 1.0
@@ -95,6 +97,8 @@ def filter_lines(lines):
     keys = list(clusters.keys())
     keys.sort()
 
+    print("groups:", len(keys))
+
     out = []
 
     for k in keys:
@@ -103,7 +107,7 @@ def filter_lines(lines):
         num = len(v)
         sum_len = sum([l[1] for l in v])
         #print(k, len(v), sum_len)
-        if num > 1 and sum_len > 20:
+        if num >= GROUP_MIN_NUM and sum_len >= GROUP_MIN_SUM:
             print(k)
             s_sum = 0.0
             i_sum = 0.0
@@ -112,7 +116,7 @@ def filter_lines(lines):
             y_max = 0.0
             for item in v:
                 (line, l, s, i) = item
-                print("  %s %4.2f %f %f" % (line, l, s, i))
+                #print("  %s %4.2f %f %f" % (line, l, s, i))
                 s_sum += (l * s)
                 i_sum += (l * i)
                 l_sum += l
@@ -122,7 +126,7 @@ def filter_lines(lines):
                 dy = y2 - y1
                 m = dx / dy
 
-                print("      dx = %f dy = %f m = %f" % (dx, dy, m))
+                #print("      dx = %f dy = %f m = %f" % (dx, dy, m))
 
                 if y1 < y_min or y_min == 0.0:
                     y_min = y1
@@ -135,12 +139,11 @@ def filter_lines(lines):
 
             s_avg = s_sum / l_sum
             i_avg = i_sum / l_sum
-            print("  %f %f (%f %f)" % (s_avg, i_avg, y_min, y_max))
+            #print("  %f %f (%f %f)" % (s_avg, i_avg, y_min, y_max))
             
             # y = mx + b
 
-            line = v[0][0][0]
-            print("orig:", line)
+            line = v[0][0][0]            
             
             # y0 = int(line[1])
             # x0 = int((y0 * s_avg) + i_avg)
@@ -153,7 +156,7 @@ def filter_lines(lines):
             x1 = int((y1 * s_avg) + i_avg)
 
             line = [[x0, y0, x1, y1]]
-            print(" line:", line)
+            #print(" line:", line)
             out.append(line)   
             #out.extend(v_lines)
     return out
@@ -168,14 +171,14 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
 def process_image(img):    
     img_orig = img.copy()
     vertices = image_roi(img, ROI_TOP_WIDTH, ROI_TOP_HEIGHT)
-    print(vertices)
+    
     img = helper.grayscale(img)
     img = helper.canny(img, CANNY_LOW, CANNY_HIGH)
-    img = helper.gaussian_blur(img, GAUSS_KERNEL) 
+    img = helper.gaussian_blur(img, GAUSS_KERNEL)     
     
     img = helper.region_of_interest(img, vertices)    
-    
-    lines = hough_lines(img, HOUGH_RHO, HOUGH_THETA, HOUGH_THRESHOLD, HOUGH_MIN_LINE_LEN, HOUGH_MAX_LINE_GAP)
+    #return img
+    lines = hough_lines(img, HOUGH_RHO, HOUGH_THETA, HOUGH_THRESHOLD, HOUGH_MIN_LINE_LEN, HOUGH_MAX_LINE_GAP)    
     lines = filter_lines(lines)
 
     img_lines = draw_lines(img_orig, lines, LINE_COLOR, LINE_WIDTH)
