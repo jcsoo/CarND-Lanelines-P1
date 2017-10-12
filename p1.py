@@ -38,7 +38,7 @@ GROUP_SLOPE = 0.5
 GROUP_MIN_NUM = 1
 GROUP_MIN_SUM = 1
 
-GROUP_LEFT_OFFSET_MIN = 0.0
+GROUP_LEFT_OFFSET_MIN = -0.1
 GROUP_LEFT_OFFSET_MAX = 0.1
 GROUP_LEFT_SLOPE_MIN = 1.0
 GROUP_LEFT_SLOPE_MAX = 2.0
@@ -166,6 +166,7 @@ def filter_lines(lines, vertices):
                     print('    right reject slope', s_avg, i_avg)
                     continue
             else:
+                # print('  left')
                 if i_avg < x_max * GROUP_LEFT_OFFSET_MIN or i_avg > x_max * GROUP_LEFT_OFFSET_MAX:
                     print('    left reject offset', s_avg, i_avg)
                     continue
