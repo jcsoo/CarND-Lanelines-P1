@@ -76,9 +76,6 @@ def filter_lines(lines):
     #     - Weighted average (slope, intercept) => line    
     #     - Linear regression
 
-    print("Line Count:", len(lines))
-
-
     # TODO - group based on positive / negative slope, linear regression of each
     # TODO - draw line based on slope + intercept
     # TODO - return line list with line type (LINE_SOLID, LINE_DASHED, LINE_LEFT, LINE_RIGHT, LINE_WHITE, LINE_YELLOW)
@@ -97,7 +94,7 @@ def filter_lines(lines):
     keys = list(clusters.keys())
     keys.sort()
 
-    print("groups:", len(keys))
+    #print("groups:", len(keys))
 
     out = []
 
@@ -108,7 +105,7 @@ def filter_lines(lines):
         sum_len = sum([l[1] for l in v])
         #print(k, len(v), sum_len)
         if num >= GROUP_MIN_NUM and sum_len >= GROUP_MIN_SUM:
-            print(k)
+            #print(k)
             s_sum = 0.0
             i_sum = 0.0
             l_sum = 0.0
@@ -202,7 +199,7 @@ def main(args):
         a = fig.add_subplot(rows, cols, i + 1)
         a.set_title(title, fontsize=10)
         # plt.axis('off')
-        print(arg)
+        #print(arg)
         img_out = process_image(img)
         plt.imshow(img_out)        
 
