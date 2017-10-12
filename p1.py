@@ -1,3 +1,6 @@
+
+# use `pythonw p1.py` on OSX
+
 import sys, os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -17,7 +20,7 @@ ROI_TOP_WIDTH = 0.30
 ROI_TOP_HEIGHT = 0.35
 
 # distance resolution in pixels of the Hough grid
-HOUGH_RHO = 1
+HOUGH_RHO = 2
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
@@ -54,8 +57,7 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
 def len_slope_intercept(line):
     si = []
     for x1, y1, x2, y2 in line:
-        #si.append(abs(x2-x1) / abs(y2-y1))
-        l = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        l = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         p = np.polyfit([y1, y2], [x1, x2], 1)
         # Only process first segment of line
         return (l, p[0], p[1])   
@@ -69,6 +71,9 @@ def filter_lines(lines):
     #     - Weighted average (slope, intercept) => line    
     #     - Linear regression
 
+    print("Line Count:", len(lines))
+
+
     # TODO - group based on positive / negative slope, linear regression of each
     # TODO - draw line based on slope + intercept
     # TODO - return line list with line type (LINE_SOLID, LINE_DASHED, LINE_LEFT, LINE_RIGHT, LINE_WHITE, LINE_YELLOW)
@@ -78,7 +83,7 @@ def filter_lines(lines):
 
     for line in lines:
         (l, s, i) = len_slope_intercept(line)
-        key = (round(s * 10.0), round(i / 40.0))
+        key = (round(s * 5.0) / 5.0, round(i / 5.0) * 5.0)
         #print(line, l, s, i, key)
         v = clusters.get(key, [])
         v.append((line, l, s, i))
@@ -95,9 +100,59 @@ def filter_lines(lines):
         num = len(v)
         sum_len = sum([l[1] for l in v])
         #print(k, len(v), sum_len)
-        if num > 1 and sum_len > 100:
-            #print(k, v)
-            out.extend(v_lines)
+        if num > 1 and sum_len > 120:
+            print(k)
+            s_sum = 0.0
+            i_sum = 0.0
+            l_sum = 0.0
+            y_min = 0.0
+            y_max = 0.0
+            for item in v:
+                (line, l, s, i) = item
+                print("  %s %4.2f %f %f" % (line, l, s, i))
+                s_sum += (l * s)
+                i_sum += (l * i)
+                l_sum += l
+                (x1, y1, x2, y2) = line[0]
+
+                dx = x2 - x1
+                dy = y2 - y1
+                m = dx / dy
+
+                print("      dx = %f dy = %f m = %f" % (dx, dy, m))
+
+                if y1 < y_min or y_min == 0.0:
+                    y_min = y1
+                if y2 < y_min:
+                    y_min = y2
+                if y1 > y_max:
+                    y_max = y1
+                if y2 > y_max:
+                    y_max = y2
+
+            s_avg = s_sum / l_sum
+            i_avg = i_sum / l_sum
+            print("  %f %f (%f %f)" % (s_avg, i_avg, y_min, y_max))
+            
+            # y = mx + b
+
+            line = v[0][0][0]
+            print("orig:", line)
+            
+            # y0 = int(line[1])
+            # x0 = int((y0 * s_avg) + i_avg)
+            # y1 = int(line[3])
+            # x1 = int((y1 * s_avg) + i_avg)
+
+            y0 = int(0)
+            x0 = int((y0 * s_avg) + i_avg)
+            y1 = int(1024)
+            x1 = int((y1 * s_avg) + i_avg)
+
+            line = [[x0, y0, x1, y1]]
+            print(" line:", line)
+            out.append(line)   
+            #out.extend(v_lines)
     return out
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
@@ -141,6 +196,7 @@ def main(args):
         a = fig.add_subplot(rows, cols, i + 1)
         a.set_title(title, fontsize=10)
         # plt.axis('off')
+        print(arg)
         img_out = process_image(img)
         plt.imshow(img_out)        
 
