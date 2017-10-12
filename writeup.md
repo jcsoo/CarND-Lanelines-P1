@@ -13,7 +13,10 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/grayscale.jpg "Grayscale"
+[grayscale]: ./test_images_grayscale/solidWhiteRight.jpg "Grayscale"
+[canny_masked]: ./test_images_canny_masked/solidWhiteRight.jpg "Canny Masked"
+[hough]: ./test_images_hough/solidWhiteRight.jpg "Hough Transform"
+[output]: ./test_images_output/solidWhiteRight.jpg "Output"
 
 ---
 
@@ -25,23 +28,23 @@ My pipeline is similar to what was described in the project introductory videos:
 
    - Convert to grayscale
 
-[grayscale]: ./test_images_grayscale/solidWhiteRight.jpg "Grayscale"
+![grayscale][grayscale]
 
    - Run the Canny filter
    - Optionally, Gaussian blur the Canny output
    - Mask the image to a specific region of interest (ROI)
 
-[canny_masked]: ./test_images_canny_masked/solidWhiteRight.jpg "Canny Masked"
+![canny_masked][canny_masked]
 
    - Use the Hough Transform to identify line candidates
 
-[hough]: ./test_images_canny_masked/solidWhiteRight.jpg "Hough Transform"
+![hough][hough]
 
    - Filter + group the line candidates
    - Draw the remaining candidates, bounded by the ROI  
    - Merge the lines with the original image
 
-[output]: ./test_images_output/solidWhiteRight.jpg "Output"
+![output][output]
    
 
 Most of my work went into filtering and grouping the line candidates, in the group_lines method,
