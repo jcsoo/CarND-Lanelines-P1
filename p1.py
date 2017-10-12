@@ -10,7 +10,7 @@ import math
 import helper
 
 CANNY_LOW = 50
-CANNY_HIGH = 250
+CANNY_HIGH = 255
 
 GAUSS_KERNEL = 3
 
@@ -40,7 +40,8 @@ GROUP_SLOPE = 0.5
 GROUP_MIN_NUM = 1
 GROUP_MIN_SUM = 1
 
-GROUP_ENABLE_ENVELOPE = True
+GROUP_ITEM_ENABLE_ENVELOPE = True
+GROUP_ENABLE_ENVELOPE = False
 
 GROUP_LEFT_OFFSET_MIN = -0.2
 GROUP_LEFT_OFFSET_MAX = 0.1
@@ -50,8 +51,7 @@ GROUP_LEFT_SLOPE_MAX = 2.0
 GROUP_RIGHT_OFFSET_MIN = 0.8
 GROUP_RIGHT_OFFSET_MAX = 1.1
 GROUP_RIGHT_SLOPE_MIN = -2.0
-GROUP_RIGHT_SLOPE_MAX = -1.0
-
+GROUP_RIGHT_SLOPE_MAX = -1.2
 
 
 # multiplier for lines
@@ -136,14 +136,32 @@ def filter_lines(lines, vertices):
             for item in v:
                 (line, l, s, i) = item
                 #print("  %s %4.2f %f %f" % (line, l, s, i))
+                if GROUP_ITEM_ENABLE_ENVELOPE:
+                    if i > x_mid:
+                        if i < x_max * GROUP_RIGHT_OFFSET_MIN or i > x_max * GROUP_RIGHT_OFFSET_MAX:
+                            #print('    right reject offset', s_avg, i_avg, sum_len)
+                            continue
+                        if s < GROUP_RIGHT_SLOPE_MIN or s > GROUP_RIGHT_SLOPE_MAX:
+                            print('    right reject slope', s, i, l)
+                            continue
+                    else:
+                        # print('  left')
+                        if i < x_max * GROUP_LEFT_OFFSET_MIN or i > x_max * GROUP_LEFT_OFFSET_MAX:
+                            #print('    left reject offset', s_avg, i_avg, sum_len)
+                            continue
+                        if s < GROUP_LEFT_SLOPE_MIN or s > GROUP_LEFT_SLOPE_MAX:
+                            print('    left reject slope', s, i, l)
+                            continue
+
+
                 s_sum += (l * s)
                 i_sum += (l * i)
                 l_sum += l
-                (x1, y1, x2, y2) = line[0]
+                # (x1, y1, x2, y2) = line[0]
 
-                dx = x2 - x1
-                dy = y2 - y1
-                m = dx / dy
+                # dx = x2 - x1
+                # dy = y2 - y1
+                # m = dx / dy
 
                 #print("      dx = %f dy = %f m = %f" % (dx, dy, m))
 
@@ -156,6 +174,11 @@ def filter_lines(lines, vertices):
                 # if y2 > y_max:
                 #     y_max = y2
 
+            if l_sum == 0:
+                continue
+
+
+
             s_avg = s_sum / l_sum
             i_avg = i_sum / l_sum
             #print("  %f %f (%f %f)" % (s_avg, i_avg, y_min, y_max))
@@ -165,7 +188,7 @@ def filter_lines(lines, vertices):
             if GROUP_ENABLE_ENVELOPE:
                 if i_avg > x_mid:
                     if i_avg < x_max * GROUP_RIGHT_OFFSET_MIN or i_avg > x_max * GROUP_RIGHT_OFFSET_MAX:
-                        print('    right reject offset', s_avg, i_avg, sum_len)
+                        #print('    right reject offset', s_avg, i_avg, sum_len)
                         continue
                     if s_avg < GROUP_RIGHT_SLOPE_MIN or s_avg > GROUP_RIGHT_SLOPE_MAX:
                         print('    right reject slope', s_avg, i_avg, sum_len)
@@ -173,7 +196,7 @@ def filter_lines(lines, vertices):
                 else:
                     # print('  left')
                     if i_avg < x_max * GROUP_LEFT_OFFSET_MIN or i_avg > x_max * GROUP_LEFT_OFFSET_MAX:
-                        print('    left reject offset', s_avg, i_avg, sum_len)
+                        #print('    left reject offset', s_avg, i_avg, sum_len)
                         continue
                     if s_avg < GROUP_LEFT_SLOPE_MIN or s_avg > GROUP_LEFT_SLOPE_MAX:
                         print('    left reject slope', s_avg, i_avg, sum_len)
