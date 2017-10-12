@@ -24,11 +24,11 @@ HOUGH_RHO = 2
 # angular resolution in radians of the Hough grid
 HOUGH_THETA = 2 * (np.pi / 180)
 # minimum number of votes (intersections in Hough grid cell)
-HOUGH_THRESHOLD = 4
+HOUGH_THRESHOLD = 200
 # minimum number of pixels making up a line
-HOUGH_MIN_LINE_LEN = 20
+HOUGH_MIN_LINE_LEN = 40
 # maximum gap in pixels between connectable line segments
-HOUGH_MAX_LINE_GAP = 10
+HOUGH_MAX_LINE_GAP = 5
 
 LINE_COLOR = [255, 0, 0]
 LINE_WIDTH = 1
@@ -144,9 +144,9 @@ def filter_lines(lines):
             # y1 = int(line[3])
             # x1 = int((y1 * s_avg) + i_avg)
 
-            y0 = int(0)
+            y0 = int(350)
             x0 = int((y0 * s_avg) + i_avg)
-            y1 = int(1024)
+            y1 = int(540)
             x1 = int((y1 * s_avg) + i_avg)
 
             line = [[x0, y0, x1, y1]]
@@ -165,7 +165,7 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
 def process_image(img):    
     img_orig = img.copy()
     vertices = image_roi(img, ROI_TOP_WIDTH, ROI_TOP_HEIGHT)
-
+    print(vertices)
     img = helper.grayscale(img)
     img = helper.canny(img, CANNY_LOW, CANNY_HIGH)
     img = helper.gaussian_blur(img, GAUSS_KERNEL) 
