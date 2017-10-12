@@ -250,9 +250,12 @@ def main(args):
         img = mpimg.imread(arg)
         a = fig.add_subplot(rows, cols, i + 1)
         a.set_title(title, fontsize=10)
-        # plt.axis('off')
+        plt.axis('off')
         #print(arg)
         img_out = process_image(img)
+        out_path = arg.replace('test_images/','test_images_output/')
+        print(out_path)
+        mpimg.imsave(out_path, img_out)
         plt.imshow(img_out)        
 
     plt.show()
