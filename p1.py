@@ -9,6 +9,8 @@ import cv2
 import math
 import helper
 
+DEBUG = False
+
 CANNY_LOW = 50
 CANNY_HIGH = 255
 
@@ -142,7 +144,8 @@ def filter_lines(lines, vertices):
                             #print('    right reject offset', s_avg, i_avg, sum_len)
                             continue
                         if s < GROUP_RIGHT_SLOPE_MIN or s > GROUP_RIGHT_SLOPE_MAX:
-                            print('    right reject slope', s, i, l)
+                            if DEBUG:
+                                print('    right reject slope', s, i, l)
                             continue
                     else:
                         # print('  left')
@@ -150,7 +153,8 @@ def filter_lines(lines, vertices):
                             #print('    left reject offset', s_avg, i_avg, sum_len)
                             continue
                         if s < GROUP_LEFT_SLOPE_MIN or s > GROUP_LEFT_SLOPE_MAX:
-                            print('    left reject slope', s, i, l)
+                            if DEBUG:
+                                print('    left reject slope', s, i, l)
                             continue
 
 
